@@ -5,18 +5,8 @@ require 'optparse'
 
 #オプションの値を取得
 options = ARGV.getopts('y:','m:')
-
-if options['y'] != nil
-  year = options['y'].to_i
-else
-  year = Date.today.year  #オプションが指定されていなければ今年のカレンダーを表示する
-end
-
-if options['m'] != nil
-  month = options['m'].to_i
-else
-  month = Date.today.month  #オプションが指定されていなければ今月のカレンダーを表示する
-end
+year = options['y']&.to_i || Date.today.year    #オプションが指定されていなければ今年のカレンダーを表示する
+month = options['m']&.to_i || Date.today.month  #オプションが指定されていなければ今月のカレンダーを表示する
 
 #月初日、月末日の取得
 first_day = Date.new(year, month, 1)
