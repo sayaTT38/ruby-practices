@@ -5,7 +5,7 @@ score = ARGV[0]
 scores = score.split(',')
 shots = []
 scores.each do |s|
-  if s == 'X' # strike
+  if s == 'X' # ストライク
     shots << 10
     shots << 0
   else
@@ -13,7 +13,7 @@ scores.each do |s|
   end
 end
 
-# フレームごとにshotsを分解
+# フレームごとにshotsを分ける
 frames = []
 i = 0
 # 1〜9フレーム
@@ -27,24 +27,35 @@ frames << shots[i..]
 # ポイントの計算
 point = 0
 frames.each_with_index do |frame, index|
-  if index < 9 # 1~9フレーム目の処理
-    if frame[0] == 10 # strike
-      # 次の2投の点を加算する
-      if frames[index + 1][0] != 10 # 次の1投目がストライクじゃない
-        point += (frame.sum + frames[index + 1][0] + frames[index + 1][1])
-      elsif frames[index + 2].nil? # 次の1投がストライクかつ、次の次のフレームが存在しない（＝10フレーム目内で2投取る）
-        point += (frame.sum + frames[index + 1][0] + frames[index + 1][2])
-      else # 次の1投がストライクかつ、次の次のフレームが存在する
-        point += (frame.sum + frames[index + 1][0] + frames[index + 2][0])
-      end
-    elsif frame.sum == 10 # spare
-      # 次の1投の点を加算する
-      point += (frame.sum + frames[index + 1][0])
-    else
-      point += frame.sum
-    end
-  else # 10フレーム目の処理
+  # 10フレーム目の処理
+  if index == 9
     point += frame.sum
+    next
+  end
+
+  # 1~9フレーム目の処理(ストライクとスペア以外)
+  if frame[0] != 10 && frame.sum != 10 # ストライクでもスペアでもない
+    point += frame.sum
+    next
+  end
+
+  # 1~9フレーム目の処理(ストライクとスペア)
+  if frame[0] == 10 # ストライク
+    next_frame = frames[index + 1]
+    next_next_frame = frames[index + 2]
+    # 次の2投の点を加算する
+    bonus = if next_frame[0] != 10 # 次の1投がストライクじゃない
+              next_frame[0] + next_frame[1]
+            elsif next_next_frame.nil? # 次の1投がストライクかつ、次の次のフレームが存在しない（＝10フレーム目内で2投取る）
+              next_frame[0] + next_frame[2]
+            else # 次の1投がストライクかつ、次の次のフレームが存在する
+              next_frame[0] + next_next_frame[0]
+            end
+    point += (frame.sum + bonus)
+  elsif frame.sum == 10 # スペア
+    next_frame = frames[index + 1]
+    # 次の1投の点を加算する
+    point += (frame.sum + next_frame[0])
   end
 end
 
