@@ -14,20 +14,17 @@ scores.each do |s|
 end
 
 frames = []
-i = 0
-9.times do
-  frames << shots[i, 2]
-  i += 2
+9.times do |n|
+  frames << shots[n * 2, 2]
 end
 # 10フレーム目 ※10フレーム目だけ、配列の長さが3以上の可能性がある
-frames << shots[i..]
+frames << shots[18..]
 
-point = 0
-frames.each_with_index do |frame, index|
+point = frames.each_with_index.sum do |frame, index|
+  next_frame = frames[index + 1]
   if index == 9
-    point += frame.sum
+    frame.sum
   elsif frame[0] == 10
-    next_frame = frames[index + 1]
     next_next_frame = frames[index + 2]
     bonus = if next_frame[0] == 10
               if index == 8 # 9フレーム目で次がストライクの場合、ボーナス2投は10フレーム目内から取得する
@@ -38,12 +35,11 @@ frames.each_with_index do |frame, index|
             else
               next_frame[0] + next_frame[1]
             end
-    point += (frame.sum + bonus)
+    frame.sum + bonus
   elsif frame.sum == 10
-    next_frame = frames[index + 1]
-    point += (frame.sum + next_frame[0])
+    frame.sum + next_frame[0]
   else
-    point += frame.sum
+    frame.sum
   end
 end
 
