@@ -26,15 +26,14 @@ point = frames.each_with_index.sum do |frame, index|
     frame.sum
   elsif frame[0] == 10
     next_next_frame = frames[index + 2]
-    bonus = if next_frame[0] == 10
-              if index == 8 # 9フレーム目で次がストライクの場合、ボーナス2投は10フレーム目内から取得する
-                next_frame[0] + next_frame[2]
-              else
-                next_frame[0] + next_next_frame[0]
-              end
-            else
-              next_frame[0] + next_frame[1]
-            end
+    bonus =
+      next_frame[0] +
+      if next_frame[0] == 10
+        # 9フレーム目で次がストライクの場合、ボーナス2投は10フレーム目内から取得する
+        index == 8 ? next_frame[2] : next_next_frame[0]
+      else
+        next_frame[1]
+      end
     frame.sum + bonus
   elsif frame.sum == 10
     frame.sum + next_frame[0]
