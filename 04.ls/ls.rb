@@ -2,21 +2,23 @@
 # frozen_string_literal: true
 
 COLUMN_SIZE = 3
-TAB_SIZE = 8 # 列幅計算に使用するタブサイズ
+COLUMN_WIDTH_UNIT = 8 # OS標準のlsコマンドの仕様に合わせ、列幅を8の倍数に揃える
 
 def make_files_array
-  Dir.foreach('.').to_a.reject { |dir| dir.start_with?('.') }.sort
+  Dir.glob('*').sort
 end
 
 def display_files
   files_array = make_files_array
+  return if files_array.empty?
+
   row_size = files_array.size.fdiv(COLUMN_SIZE).ceil
   file_name_max_length = files_array.max_by(&:length).size
   column_width =
-    if (file_name_max_length % TAB_SIZE).zero?
-      file_name_max_length + TAB_SIZE
+    if (file_name_max_length % COLUMN_WIDTH_UNIT).zero?
+      file_name_max_length + COLUMN_WIDTH_UNIT
     else
-      file_name_max_length.fdiv(TAB_SIZE).ceil * TAB_SIZE
+      file_name_max_length.ceildiv(COLUMN_WIDTH_UNIT) * COLUMN_WIDTH_UNIT
     end
   row_size.times do |row|
     row_data =
