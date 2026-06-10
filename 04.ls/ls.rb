@@ -14,12 +14,7 @@ def display_files
 
   row_size = files_array.size.fdiv(COLUMN_SIZE).ceil
   file_name_max_length = files_array.max_by(&:length).size
-  column_width =
-    if (file_name_max_length % COLUMN_WIDTH_UNIT).zero?
-      file_name_max_length + COLUMN_WIDTH_UNIT
-    else
-      file_name_max_length.ceildiv(COLUMN_WIDTH_UNIT) * COLUMN_WIDTH_UNIT
-    end
+  column_width = (file_name_max_length + 1).ceildiv(COLUMN_WIDTH_UNIT) * COLUMN_WIDTH_UNIT
   row_size.times do |row|
     row_data =
       COLUMN_SIZE.times.map do |col|
