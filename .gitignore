@@ -118,3 +118,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+.vscode/launch.json
+.gitignore
+.gitignore
