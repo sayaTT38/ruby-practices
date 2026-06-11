@@ -7,15 +7,15 @@ COLUMN_SIZE = 3
 COLUMN_WIDTH_UNIT = 8 # OS標準のlsコマンドの仕様に合わせ、列幅を8の倍数に揃える
 
 def main
-  options = get_options
+  options = parse_options
   files_array = make_files_array(options)
   display_files(files_array)
 end
 
-def get_options
+def parse_options
   options = {}
   op = OptionParser.new
-  op.on('-a') {options[:a] = true}
+  op.on('-a') { options[:a] = true }
   op.parse!(ARGV)
   options
 end
