@@ -21,7 +21,7 @@ def parse_options
 end
 
 def make_files_array(options)
-  files = options[:a] ? Dir.glob("*", File::FNM_DOTMATCH) : Dir.glob('*')
+  options[:a] ? Dir.glob('*', File::FNM_DOTMATCH) : Dir.glob('*')
 end
 
 def display_files(files_array)
