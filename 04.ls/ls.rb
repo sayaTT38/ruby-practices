@@ -1,15 +1,31 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'optparse'
+
 COLUMN_SIZE = 3
 COLUMN_WIDTH_UNIT = 8 # OS標準のlsコマンドの仕様に合わせ、列幅を8の倍数に揃える
 
-def make_files_array
-  Dir.glob('*').sort
+def main
+  options = parse_options
+  files_array = make_files_array(options)
+  display_files(files_array)
 end
 
-def display_files
-  files_array = make_files_array
+def parse_options
+  options = {}
+  OptionParser.new do |op|
+    op.on('-a') { options[:a] = true }
+  end.parse!(ARGV)
+  options
+end
+
+def make_files_array(options)
+  flags = options[:a] ? File::FNM_DOTMATCH : 0
+  Dir.glob('*', flags)
+end
+
+def display_files(files_array)
   return if files_array.empty?
 
   row_size = files_array.size.fdiv(COLUMN_SIZE).ceil
@@ -24,4 +40,4 @@ def display_files
   end
 end
 
-display_files
+main
