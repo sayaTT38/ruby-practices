@@ -16,13 +16,15 @@ def parse_options
   options = {}
   OptionParser.new do |op|
     op.on('-a') { options[:a] = true }
+    op.on('-r') { options[:r] = true }
   end.parse!(ARGV)
   options
 end
 
 def make_files_array(options)
   flags = options[:a] ? File::FNM_DOTMATCH : 0
-  Dir.glob('*', flags)
+  files = Dir.glob('*', flags)
+  options[:r] ? files.reverse : files
 end
 
 def display_files(files_array)
