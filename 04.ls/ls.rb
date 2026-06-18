@@ -71,16 +71,16 @@ def display_normal_format(files_array)
 end
 
 def display_long_option_format(files_array)
-  puts "total #{files_array.sum { |file| File.stat(file).blocks }}"
-
+  stats = files_array.map { |file| File.stat(file) }
+  puts "total #{stats.sum(&:blocks)}"
   max_nlink_length =
-    files_array.map { |file| File.stat(file).nlink.to_s.length }.max
+    stats.map { |stat| stat.nlink.to_s.length }.max
   max_uname_length =
-    files_array.map { |file| Etc.getpwuid(File.stat(file).uid).name.length }.max
+    stats.map { |stat| Etc.getpwuid(stat.uid).name.length }.max
   max_gname_length =
-    files_array.map { |file| Etc.getgrgid(File.stat(file).gid).name.length }.max
+    stats.map { |stat| Etc.getgrgid(stat.gid).name.length }.max
   max_size_length =
-    files_array.map { |file| File.stat(file).size.to_s.length }.max
+    stats.map { |stat| stat.size.to_s.length }.max
   files_array.each do |file|
     puts make_long_option_format(file, max_nlink_length, max_uname_length, max_gname_length, max_size_length)
   end
