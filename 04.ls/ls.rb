@@ -71,30 +71,27 @@ def display_normal_format(files_array)
 end
 
 def display_long_option_format(files_array)
-  stats = files_array.map { |file| File.stat(file) }
-  puts "total #{stats.sum(&:blocks)}"
-  max_nlink_length =
-    stats.map { |stat| stat.nlink.to_s.length }.max
-  max_uname_length =
-    stats.map { |stat| Etc.getpwuid(stat.uid).name.length }.max
-  max_gname_length =
-    stats.map { |stat| Etc.getgrgid(stat.gid).name.length }.max
-  max_size_length =
-    stats.map { |stat| stat.size.to_s.length }.max
-  files_array.each do |file|
-    puts make_long_option_format(file, max_nlink_length, max_uname_length, max_gname_length, max_size_length)
+  file_stats = files_array.map { |file| [file, File.stat(file)] }
+  puts "total #{file_stats.sum { |_, stat| stat.blocks }}"
+  max_lengths = {
+    nlink: file_stats.map { |_, stat| stat.nlink.to_s.length }.max,
+    uname: file_stats.map { |_, stat| Etc.getpwuid(stat.uid).name.length }.max,
+    gname: file_stats.map { |_, stat| Etc.getgrgid(stat.gid).name.length }.max,
+    size: file_stats.map { |_, stat| stat.size.to_s.length }.max
+  }
+  file_stats.each do |file, stat|
+    puts make_long_option_format(file, stat, max_lengths)
   end
 end
 
-def make_long_option_format(file, max_nlink_length, max_uname_length, max_gname_length, max_size_length)
-  stat = File.stat(file)
+def make_long_option_format(file, stat, max_lengths)
   mode = stat.mode.to_s(8)
   [
     file_type_to_string(stat.ftype) + permission_to_string(mode[-3, 3]),
-    stat.nlink.to_s.rjust(max_nlink_length + 1),
-    Etc.getpwuid(stat.uid).name.ljust(max_uname_length + 1),
-    Etc.getgrgid(stat.gid).name.ljust(max_gname_length + 1),
-    stat.size.to_s.rjust(max_size_length),
+    stat.nlink.to_s.rjust(max_lengths[:nlink] + 1),
+    Etc.getpwuid(stat.uid).name.ljust(max_lengths[:uname] + 1),
+    Etc.getgrgid(stat.gid).name.ljust(max_lengths[:gname] + 1),
+    stat.size.to_s.rjust(max_lengths[:size]),
     stat.mtime.strftime('%b %e %H:%M'),
     file
   ].join(' ')
