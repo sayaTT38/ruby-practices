@@ -71,7 +71,7 @@ def display_normal_format(files_array)
 end
 
 def display_long_option_format(files_array)
-  file_stats = files_array.map { |file| [file, File.stat(file)] }
+  file_stats = files_array.map { |file| [file, File.lstat(file)] }
   puts "total #{file_stats.sum { |_, stat| stat.blocks }}"
   max_lengths = {
     nlink: file_stats.map { |_, stat| stat.nlink.to_s.length }.max,
@@ -85,6 +85,12 @@ def display_long_option_format(files_array)
 end
 
 def make_long_option_format(file, stat, max_lengths)
+  file_name =
+    if stat.ftype == 'link'
+      "#{file} -> #{File.readlink(file)}"
+    else
+      file
+    end
   mode = stat.mode.to_s(8)
   [
     file_type_to_string(stat.ftype) + permission_to_string(mode[-3, 3]),
@@ -93,7 +99,7 @@ def make_long_option_format(file, stat, max_lengths)
     Etc.getgrgid(stat.gid).name.ljust(max_lengths[:gname] + 1),
     stat.size.to_s.rjust(max_lengths[:size]),
     stat.mtime.strftime('%b %e %H:%M'),
-    file
+    file_name
   ].join(' ')
 end
 
