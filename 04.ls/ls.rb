@@ -71,20 +71,34 @@ def display_normal_format(files_array)
 end
 
 def display_long_option_format(files_array)
-  file_stats = files_array.map { |file| [file, File.lstat(file)] }
-  puts "total #{file_stats.sum { |_, stat| stat.blocks }}"
+  file_metadata = make_file_metadata(files_array)
+  puts "total #{file_metadata.sum { |m| m[:stat].blocks }}"
   max_lengths = {
-    nlink: file_stats.map { |_, stat| stat.nlink.to_s.length }.max,
-    uname: file_stats.map { |_, stat| Etc.getpwuid(stat.uid).name.length }.max,
-    gname: file_stats.map { |_, stat| Etc.getgrgid(stat.gid).name.length }.max,
-    size: file_stats.map { |_, stat| stat.size.to_s.length }.max
+    nlink: file_metadata.map { |m| m[:stat].nlink.to_s.length }.max,
+    uname: file_metadata.map { |m| m[:uname].length }.max,
+    gname: file_metadata.map { |m| m[:gname].length }.max,
+    size: file_metadata.map { |m| m[:stat].size.to_s.length }.max
   }
-  file_stats.each do |file, stat|
-    puts make_long_option_format(file, stat, max_lengths)
+  file_metadata.each do |metadata|
+    puts make_long_option_format(metadata, max_lengths)
   end
 end
 
-def make_long_option_format(file, stat, max_lengths)
+def make_file_metadata(files_array)
+  files_array.map do |file|
+    file_lstat = File.lstat(file)
+    {
+      file: file,
+      stat: file_lstat,
+      uname: Etc.getpwuid(file_lstat.uid).name,
+      gname: Etc.getgrgid(file_lstat.gid).name
+    }
+  end
+end
+
+def make_long_option_format(metadata, max_lengths)
+  stat = metadata[:stat]
+  file = metadata[:file]
   file_name =
     if stat.ftype == 'link'
       "#{file} -> #{File.readlink(file)}"
@@ -95,8 +109,8 @@ def make_long_option_format(file, stat, max_lengths)
   [
     file_type_to_string(stat.ftype) + permission_to_string(mode[-3, 3]),
     stat.nlink.to_s.rjust(max_lengths[:nlink] + 1),
-    Etc.getpwuid(stat.uid).name.ljust(max_lengths[:uname] + 1),
-    Etc.getgrgid(stat.gid).name.ljust(max_lengths[:gname] + 1),
+    metadata[:uname].ljust(max_lengths[:uname] + 1),
+    metadata[:gname].ljust(max_lengths[:gname] + 1),
     stat.size.to_s.rjust(max_lengths[:size]),
     stat.mtime.strftime('%b %e %H:%M'),
     file_name
